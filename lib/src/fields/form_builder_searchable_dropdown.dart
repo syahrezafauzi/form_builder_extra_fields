@@ -185,7 +185,7 @@ class FormBuilderSearchableDropdown<T> extends FormBuilderField<T> {
                 state.didChange(value);
               },
               popupProps: popupProps,
-              selectedItem: state.value,
+              selectedItem: selectedItem ?? state.value,
             );
           },
         );
