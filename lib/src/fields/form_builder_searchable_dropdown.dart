@@ -157,11 +157,11 @@ class FormBuilderSearchableDropdown<T>
               itemAsString: itemAsString,
               onBeforeChange: onBeforeChange,
               onChanged: (value) {
+                var holder = state.value ?? Value(selectedItems: []);
                 if (value == null) {
-                  state.didChange(state.value?.copyWith(selectedItems: []));
+                  state.didChange(holder.copyWith(selectedItems: []));
                 } else {
-                  state
-                      .didChange(state.value?.copyWith(selectedItems: [value]));
+                  state.didChange(holder.copyWith(selectedItems: [value]));
                 }
               },
               popupProps: popupProps,
