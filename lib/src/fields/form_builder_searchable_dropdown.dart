@@ -236,8 +236,9 @@ class FormBuilderSearchableDropdown<T>
               items: items,
               itemAsString: itemAsString,
               onChanged: (value) {
+                var holder = state.value ?? Value(selectedItems: []);
                 state.didChange(
-                  state.value?.copyWith(
+                  holder.copyWith(
                     selectedItems: value,
                   ),
                 );
