@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 /// Field for selecting value(s) from a searchable list
-class FormBuilderSearchableDropdown<T> extends FormBuilderFieldDecoration<T> {
+class FormBuilderSearchableDropdown<T>
+    extends FormBuilderFieldDecoration<Value<T>> {
   ///offline items list
   final List<T> items;
 
@@ -134,7 +135,7 @@ class FormBuilderSearchableDropdown<T> extends FormBuilderFieldDecoration<T> {
         popupValidationMultiSelectionWidget = null,
         popupCustomMultiSelectionWidget = null,
         super(
-          builder: (FormFieldState<T?> field) {
+          builder: (FormFieldState<Value<T>?> field) {
             final state = field as FormBuilderSearchableDropdownState<T>;
             return DropdownSearch<T>(
               // Hack to rebuild when didChange is called
@@ -156,10 +157,93 @@ class FormBuilderSearchableDropdown<T> extends FormBuilderFieldDecoration<T> {
               itemAsString: itemAsString,
               onBeforeChange: onBeforeChange,
               onChanged: (value) {
-                state.didChange(value);
+                if (value == null) {
+                  state.didChange(state.value?.copyWith(selectedItems: []));
+                } else {
+                  state
+                      .didChange(state.value?.copyWith(selectedItems: [value]));
+                }
               },
               popupProps: popupProps,
-              selectedItem: state.value,
+              selectedItem: state.value?.selectedItems?.firstOrNull,
+            );
+          },
+        );
+
+  FormBuilderSearchableDropdown.multiSelection({
+    super.key,
+    super.autovalidateMode,
+    super.enabled,
+    super.focusNode,
+    super.onSaved,
+    super.validator,
+    super.decoration,
+    required super.name,
+    super.initialValue,
+    super.onChanged,
+    super.valueTransformer,
+    super.onReset,
+    this.asyncItems,
+    this.autoValidateMode,
+    this.compareFn,
+    this.dropdownBuilder,
+    this.dropdownSearchDecoration,
+    this.dropdownSearchTextAlign,
+    this.dropdownSearchTextAlignVertical,
+    this.filterFn,
+    // this.isFilteredOnline = false,
+    this.itemAsString,
+    this.items = const [],
+    this.onBeforeChange,
+    this.popupOnItemAdded,
+    this.popupOnItemRemoved,
+    this.popupSelectionWidget,
+    this.selectedItem,
+    this.selectedItems = const [],
+    this.popupProps = const PopupPropsMultiSelection.menu(
+      showSearchBox: true,
+      fit: FlexFit.loose,
+    ),
+    this.clearButtonProps,
+    this.dropdownSearchTextStyle,
+    this.dropdownButtonProps,
+  })  : assert(T == String || compareFn != null),
+        isMultiSelectionMode = false,
+        dropdownBuilderMultiSelection = null,
+        onBeforeChangeMultiSelection = null,
+        onSavedMultiSelection = null,
+        onChangedMultiSelection = null,
+        popupValidationMultiSelectionWidget = null,
+        popupCustomMultiSelectionWidget = null,
+        super(
+          builder: (FormFieldState<Value<T>?> field) {
+            final state = field as FormBuilderSearchableDropdownState<T>;
+            return DropdownSearch<T>.multiSelection(
+              // Hack to rebuild when didChange is called
+              asyncItems: asyncItems,
+              clearButtonProps: clearButtonProps ?? const ClearButtonProps(),
+              compareFn: compareFn,
+              enabled: state.enabled,
+              dropdownButtonProps:
+                  dropdownButtonProps ?? const DropdownButtonProps(),
+              dropdownDecoratorProps: DropDownDecoratorProps(
+                dropdownSearchDecoration: state.decoration,
+                textAlign: dropdownSearchTextAlign,
+                textAlignVertical: dropdownSearchTextAlignVertical,
+                baseStyle: dropdownSearchTextStyle,
+              ),
+              filterFn: filterFn,
+              items: items,
+              itemAsString: itemAsString,
+              onChanged: (value) {
+                state.didChange(
+                  state.value?.copyWith(
+                    selectedItems: value,
+                  ),
+                );
+              },
+              popupProps: popupProps as PopupPropsMultiSelection<T>,
+              selectedItems: state.value?.selectedItems ?? [],
             );
           },
         );
@@ -171,4 +255,13 @@ class FormBuilderSearchableDropdown<T> extends FormBuilderFieldDecoration<T> {
 
 class FormBuilderSearchableDropdownState<T>
     extends FormBuilderFieldDecorationState<FormBuilderSearchableDropdown<T>,
-        T> {}
+        Value<T>> {}
+
+class Value<T> {
+  final List<T>? selectedItems;
+  Value({this.selectedItems});
+
+  Value<T> copyWith({List<T>? selectedItems}) => Value(
+        selectedItems: selectedItems,
+      );
+}
